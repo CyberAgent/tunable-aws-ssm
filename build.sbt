@@ -18,3 +18,19 @@ lazy val root = (project in file("."))
       "com.amazonaws" % "aws-java-sdk-ssm" % "1.11.498"
     )
   )
+
+import ReleaseTransformations._
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  ReleaseStep(action = Command.process("publishSigned", _)),
+  setNextVersion,
+  commitNextVersion,
+  ReleaseStep(action = Command.process("sonatypeRelease", _)),
+  pushChanges
+)
