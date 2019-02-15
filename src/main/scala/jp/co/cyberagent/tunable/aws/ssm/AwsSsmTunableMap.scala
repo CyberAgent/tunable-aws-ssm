@@ -12,7 +12,7 @@ import com.typesafe.scalalogging.StrictLogging
 import scala.collection.JavaConverters._
 
 class AwsSsmTunableMap(
-    path: String,
+    prefix: String,
     client: AWSSimpleSystemsManagement,
     refreshInterval: Duration
 ) extends TunableMap
@@ -26,10 +26,10 @@ class AwsSsmTunableMap(
     triggerTask.fold(Future.Unit)(_.close(deadline))
   }
 
-  override def toString: String = s"AwsSsmTunableMap($path)"
+  override def toString: String = s"AwsSsmTunableMap($prefix)"
 
-  private[this] val normalizedPath = if (path.endsWith("/")) path else path + "/"
-  private[this] val underlying = TunableMap.newMutable(s"AwsSsmTunableMap($path)")
+  private[this] val normalizedPath = if (prefix.endsWith("/")) prefix else prefix + "/"
+  private[this] val underlying = TunableMap.newMutable(s"AwsSsmTunableMap($prefix)")
   private[this] val timer = new JavaTimer(isDaemon = true, name = Some("AwsSsmTunableMapTimer"))
 
   private[this] var triggerTask: Option[TimerTask] = None
@@ -68,7 +68,7 @@ class AwsSsmTunableMap(
   // This method is not thread safe
   private[this] def refresh(): Unit = {
     val req = new GetParametersByPathRequest()
-        .withPath(path)
+        .withPath(prefix)
         .withRecursive(false)
         .withWithDecryption(true)
         .withMaxResults(10)
