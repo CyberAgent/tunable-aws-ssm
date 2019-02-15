@@ -10,6 +10,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "tunable-aws-ssm",
     crossScalaVersions := supportedScalaVersions,
+    publishTo := sonatypePublishTo.value,
     libraryDependencies ++= Seq(
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
       "com.twitter" %% "util-tunable" % "19.1.0",
