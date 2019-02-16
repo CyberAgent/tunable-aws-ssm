@@ -1,4 +1,4 @@
-package jp.co.cyberagent.tunable.aws.ssm
+package io.github.cyberagent.tunable.aws.ssm
 
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement
 import com.amazonaws.services.simplesystemsmanagement.model.{GetParametersByPathRequest, GetParametersByPathResult, Parameter}

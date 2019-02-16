@@ -1,4 +1,4 @@
-package jp.co.cyberagent.tunable.aws.ssm
+package io.github.cyberagent.tunable.aws.ssm
 
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement
 import com.amazonaws.services.simplesystemsmanagement.model.{GetParametersByPathResult, Parameter}
@@ -72,7 +72,7 @@ class AwsSsmTunableMapSpec extends FlatSpec with MockFactory {
     )
 
     val testee = new AwsSsmTunableMap("", client, NullPoller)
-    val actual = Await.result(testee.close(Duration.Top))
+    val actual: Unit = Await.result(testee.close(Duration.Top))
     assert(actual === ())
   }
 
