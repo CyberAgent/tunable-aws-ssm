@@ -47,8 +47,8 @@ class AwsSsmTunableMap(
         .withMaxResults(10)
 
     val params: immutable.Seq[Parameter] = getParametersByPath(req)
-    params.foreach { p =>
-      for {
+    val orphanEntries = params.foldLeft(entries.toSet) { (oldEntries, p) =>
+      val maybeKey = for {
         name <- Option(p.getName)
         value <- Option(p.getValue)
       } yield {
@@ -61,7 +61,18 @@ class AwsSsmTunableMap(
           }
           knownKeys = knownKeys + key
         }
+        key
       }
+      maybeKey match {
+        case Some(key) => oldEntries.filterNot(_.key == key)
+        case None => oldEntries
+      }
+    }
+
+    // remove orphaned entries from underlying tunable map
+    orphanEntries.foreach { e =>
+      underlying.clear(e.key)
+      knownKeys = knownKeys - e.key
     }
   }
 

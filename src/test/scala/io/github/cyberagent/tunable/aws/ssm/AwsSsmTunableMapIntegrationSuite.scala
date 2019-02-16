@@ -1,15 +1,16 @@
 package io.github.cyberagent.tunable.aws.ssm
 
-import cloud.localstack.{Localstack, TestUtils}
-import cloud.localstack.docker.LocalstackDockerTestRunner
+import cloud.localstack.docker.{LocalstackDocker, LocalstackDockerTestRunner}
 import cloud.localstack.docker.annotation.{LocalstackDockerConfiguration, LocalstackDockerProperties}
+import cloud.localstack.{Localstack, TestUtils}
 import com.amazonaws.client.builder.AwsClientBuilder
-import com.amazonaws.services.simplesystemsmanagement.model.{ParameterType, PutParameterRequest}
+import com.amazonaws.services.simplesystemsmanagement.model.{DeleteParametersRequest, ParameterType, PutParameterRequest}
 import com.amazonaws.services.simplesystemsmanagement.{AWSSimpleSystemsManagement, AWSSimpleSystemsManagementClient}
+import com.twitter.util.Duration
 import com.twitter.util.tunable.TunableMap
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import cloud.localstack.docker.LocalstackDocker
+
 
 @RunWith(classOf[LocalstackDockerTestRunner])
 @LocalstackDockerProperties(randomizePorts = true, services = Array("ssm"))
@@ -32,6 +33,7 @@ class AwsSsmTunableMapIntegrationSuite extends FunSuite with BeforeAndAfterAll {
   }
 
   override def afterAll(): Unit = {
+
     if (isLocal) localstackDocker.stop()
   }
 
@@ -52,14 +54,34 @@ class AwsSsmTunableMapIntegrationSuite extends FunSuite with BeforeAndAfterAll {
         .withName(name)
         .withValue(value)
         .withType(typ)
+        .withOverwrite(true)
     client.putParameter(req)
+  }
+
+  def deleteParameters(names: String*): Unit = {
+    val req = new DeleteParametersRequest()
+            .withNames(names: _*)
+    client.deleteParameters(req)
   }
 
   test("AwsSsmTunableMap should return value") {
     putParameter("/foo/bar/k1", "v1")
 
-    val testee = AwsSsmTunableMap("/foo/bar", client)
-    val actual = testee(TunableMap.Key[String]("k1"))()
-    assert(actual === Some("v1"))
+    val testee = AwsSsmTunableMap("/foo/bar", client, Duration.fromMilliseconds(100))
+    assert(testee(TunableMap.Key[String]("k1"))() === Some("v1"))
+
+    Thread.sleep(500)
+    putParameter("/foo/bar/k1", "v2")
+    Thread.sleep(500)
+
+    assert(testee(TunableMap.Key[String]("k1"))() === Some("v2"))
+
+    Thread.sleep(500)
+    deleteParameters("/foo/bar/k1")
+    Thread.sleep(500)
+
+    assert(testee(TunableMap.Key[String]("k1"))() === None)
+
+    testee.close(Duration.Top)
   }
 }
