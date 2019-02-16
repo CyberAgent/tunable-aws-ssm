@@ -5,6 +5,29 @@
 
 This is `com.twitter.util.tunable.Tunable` implementation for AWS SSM.
 
+## Install
+
+```
+libraryDependencies += "io.github.CyberAgent" %% "tunable-aws-ssm" % version
+```
+
+## Usage
+
+```scala
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClient
+import com.twitter.util.tunable.{Tunable, TunableMap}
+import io.github.cyberagent.tunable.aws.ssm.AwsSsmTunableMap
+
+val client = AWSSimpleSystemsManagementClient.builder().build()
+val tunableMap = AwsSsmTunableMap("/path/to/tunable", client)
+
+val tunable: Tunable[String] = tunableMap(TunableMap.Key[String]("key"))
+
+tunable() match {
+  case None        => println("tunable is not configured")
+  case Some(value) => println(value)
+}
+```
 
 ## Testing
 
