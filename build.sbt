@@ -18,7 +18,9 @@ lazy val root = (project in file("."))
       "com.amazonaws" % "aws-java-sdk-ssm" % "1.11.498",
       "org.scalatest" %% "scalatest" % "3.0.5" % Test,
       "org.scalamock" %% "scalamock" % "4.1.0" % Test,
-      "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
+      "ch.qos.logback" % "logback-classic" % "1.2.3" % Test,
+      "junit" % "junit" % "4.12" % Test,
+      "cloud.localstack" % "localstack-utils" % "0.1.16" % Test
     )
   )
 
