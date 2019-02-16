@@ -15,27 +15,32 @@ import cloud.localstack.docker.LocalstackDocker
 @LocalstackDockerProperties(randomizePorts = true, services = Array("ssm"))
 class AwsSsmTunableMapIntegrationSuite extends FunSuite with BeforeAndAfterAll {
 
+  val isLocal = !sys.env.contains("CI")
   val localstackDocker = LocalstackDocker.INSTANCE
 
   override def beforeAll(): Unit = {
-    Localstack.teardownInfrastructure()
+    if (isLocal) {
+      Localstack.teardownInfrastructure()
 
-    val dockerConfig = {
-      val b = LocalstackDockerConfiguration.builder()
-      b.randomizePorts(true)
-      b.build()
-
+      val dockerConfig = {
+        val b = LocalstackDockerConfiguration.builder()
+        b.randomizePorts(true)
+        b.build()
+      }
+      localstackDocker.startup(dockerConfig)
     }
-    localstackDocker.startup(dockerConfig)
   }
 
   override def afterAll(): Unit = {
-    localstackDocker.stop()
+    if (isLocal) localstackDocker.stop()
   }
 
+  lazy val ssmEndpoint =
+    if (isLocal) LocalstackDocker.INSTANCE.getEndpointSSM
+    else "localhost:4583"
+
   lazy val client: AWSSimpleSystemsManagement = {
-    val endpoint = new AwsClientBuilder.EndpointConfiguration(
-      LocalstackDocker.INSTANCE.getEndpointSSM, "us-east-1")
+    val endpoint = new AwsClientBuilder.EndpointConfiguration(ssmEndpoint, "us-east-1")
     AWSSimpleSystemsManagementClient.builder()
         .withEndpointConfiguration(endpoint)
         .withCredentials(TestUtils.getCredentialsProvider)
