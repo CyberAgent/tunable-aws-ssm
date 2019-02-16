@@ -37,7 +37,7 @@ class AwsSsmTunableMapIntegrationSuite extends FunSuite with BeforeAndAfterAll {
 
   lazy val ssmEndpoint =
     if (isLocal) LocalstackDocker.INSTANCE.getEndpointSSM
-    else "localhost:4583"
+    else "http://localhost:4583"
 
   lazy val client: AWSSimpleSystemsManagement = {
     val endpoint = new AwsClientBuilder.EndpointConfiguration(ssmEndpoint, "us-east-1")
