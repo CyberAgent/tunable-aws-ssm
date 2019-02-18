@@ -24,3 +24,19 @@ lazy val root = (project in file("."))
       "cloud.localstack" % "localstack-utils" % "0.1.16" % Test
     )
   )
+
+import ReleaseTransformations._
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  publishArtifacts,
+  setNextVersion,
+  commitNextVersion,
+  ReleaseStep(action = Command.process("sonatypeRelease", _)),
+  pushChanges
+)
