@@ -10,6 +10,7 @@ lazy val root = (project in file("."))
     name := "tunable-aws-ssm",
     crossScalaVersions := supportedScalaVersions,
     releaseCrossBuild := true,
+    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     publishTo := sonatypePublishTo.value,
     libraryDependencies ++= Seq(
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
@@ -23,19 +24,3 @@ lazy val root = (project in file("."))
       "cloud.localstack" % "localstack-utils" % "0.1.16" % Test
     )
   )
-
-import ReleaseTransformations._
-releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  runClean,
-  runTest,
-  setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
-  ReleaseStep(action = Command.process("publishSigned", _)),
-  setNextVersion,
-  commitNextVersion,
-  ReleaseStep(action = Command.process("sonatypeRelease", _)),
-  pushChanges
-)
